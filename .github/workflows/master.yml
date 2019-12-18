@@ -1,0 +1,36 @@
+name: Master Pushed Related CI/CD
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  primary:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [8.x, 10.x, 12.x]
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v1
+
+      - name: Cache node modules
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-build-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: install dependencies
+        run: npm install
