@@ -22,7 +22,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: node_modules
-          key: ${{ runner.os }}-build-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-build-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-build-
             ${{ runner.os }}-
@@ -33,4 +33,4 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: install dependencies
-        run: npm install
+        run: yarn install

@@ -9,22 +9,6 @@ const apolloClient = new ApolloClient({
       }
     }
   },
-  resolvers: {
-    Mutation: {
-      logUserIn: (_, { token }, { cache }) => {
-        localStorage.setItem('jwt', token);
-        cache.writeDate({
-          data: {
-            auth: {
-              __typename: 'Auth',
-              isLoggedIn: true,
-            }
-          }
-        });
-        return null;
-      }
-    }
-  },
   request: async (operation: Operation) => {
     operation.setContext({
       headers: {
