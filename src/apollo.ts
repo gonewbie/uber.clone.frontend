@@ -1,6 +1,6 @@
 import ApolloClient, { Operation } from 'apollo-boost';
 
-const apolloClient = new ApolloClient({
+const client = new ApolloClient({
   clientState: {
     defaults: {
       auth: {
@@ -16,7 +16,7 @@ const apolloClient = new ApolloClient({
             data: {
               auth: {
                 __typename: 'Auth',
-                isLoggedIn: true,
+                isLoggedIn: true
               }
             }
           });
@@ -26,25 +26,23 @@ const apolloClient = new ApolloClient({
           localStorage.removeItem('jwt');
           cache.writeData({
             data: {
-              auth: {
-                __typename: 'Auth',
-                isLoggedIn: false,
-              }
+              __typename: 'Auth',
+              isLoggedIn: false
             }
           });
           return null;
-        },
+        }
       }
     }
   },
   request: async (operation: Operation) => {
     operation.setContext({
       headers: {
-        'X-JWT': localStorage.getItem('jwt')
+        'X-JWT': localStorage.getItem('jwt') || ''
       }
     });
   },
   uri: 'http://localhost:4000/graphql'
 });
 
-export default apolloClient;
+export default client;

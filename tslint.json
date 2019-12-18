@@ -1,8 +1,5 @@
 {
   "extends": ["tslint:recommended", "tslint-react", "tslint-config-prettier"],
-  "rules": {
-    "max-classes-per-file": false
-  },
   "linterOptions": {
     "exclude": [
       "config/**/*.js",
