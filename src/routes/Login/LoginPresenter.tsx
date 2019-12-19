@@ -1,6 +1,6 @@
 import React from 'react';
-import { RouteComponentProps } from 'react-router';
-import { Link } from 'react-router-dom';
+import Helmet from 'react-helmet';
+import { Link, RouteComponentProps } from 'react-router-dom';
 import styled from 'src/typed-components';
 import bgImage from '../../images/bg.png';
 
@@ -70,6 +70,9 @@ interface IProps extends RouteComponentProps<any> {}
 
 const OutHomePresenter: React.SFC<IProps> = () => (
   <Container>
+    <Helmet>
+      <title>Login | Uber</title>
+    </Helmet>
     <Header>
       <Logo>
         <Title>Uber</Title>
