@@ -21,6 +21,7 @@
     "react-helmet": "^5.2.1",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.3.0",
+    "react-toastify": "^5.4.1",
     "styled-components": "^4.4.1",
     "styled-reset": "^4.0.8",
     "typescript": "~3.7.2"
@@ -47,6 +48,7 @@
     ]
   },
   "devDependencies": {
+    "@types/react-toastify": "^4.1.0",
     "tslint": "^5.20.1",
     "tslint-config-prettier": "^1.18.0",
     "tslint-react": "^4.1.0"
