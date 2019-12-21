@@ -25,13 +25,12 @@ class PhoneLoginContainer extends React.Component<
   public render() {
     const { history } = this.props;
     const { countryCode, phoneNumber } = this.state;
-    const internationalPhoneNumber = `${countryCode}-${phoneNumber}`;
 
     return (
       <Mutation<startPhoneVerification, startPhoneVerificationVariables>
         mutation={PHONE_SIGN_IN}
         variables={{
-          phoneNumber: internationalPhoneNumber
+          phoneNumber: `${countryCode}-${phoneNumber}`
         }}
         onCompleted={data => {
           const { StartPhoneVerification } = data;
@@ -49,7 +48,7 @@ class PhoneLoginContainer extends React.Component<
             const phone = `${countryCode}-${phoneNumber}`;
             const isValid = /^\+[1-9]+-[0-9]{7,11}$/.test(phone);
             if (isValid) {
-              // mutation();
+              mutation();
               history.push({
                 pathname: '/verify-phone',
                 state: {
