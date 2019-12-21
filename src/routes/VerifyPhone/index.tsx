@@ -1,5 +1,2 @@
-import React from 'react';
-
-const R = () => <span>VerifyPhone</span>;
-
-export default R;
+import VerifyPhone from './VerifyPhoneContainer';
+export default VerifyPhone;
