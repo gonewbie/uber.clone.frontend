@@ -1,7 +1,8 @@
 import React from 'react';
-import styled from 'src/typed-components';
+import { MutationFunction } from 'react-apollo';
 import { Link } from 'react-router-dom';
-import { userProfile } from 'src/types/api';
+import styled from 'src/typed-components';
+import { toggleDriving, userProfile } from 'src/types/api';
 
 const Container = styled.div`
   height: 100%;
@@ -77,11 +78,13 @@ const ToggleDriving = styled<IToggleProps | any>('button')`
 interface IProps {
   data?: userProfile;
   loading: boolean;
+  ToggleDrivingMutation: MutationFunction<toggleDriving>;
 }
 
 const MenuPresenter: React.SFC<IProps> = ({
   data: { GetMyProfile: { user = null } = {} } = { GetMyProfile: {} },
-  loading
+  loading,
+  ToggleDrivingMutation
 }) => (
   <Container>
     {!loading &&
@@ -93,6 +96,7 @@ const MenuPresenter: React.SFC<IProps> = ({
               <Link to={'/edit-account'}>
                 <Image
                   src={
+                    user.profilePhoto ||
                     'https://yt3.ggpht.com/-CTwXMuZRaWw/AAAAAAAAAAI/AAAAAAAAAAA/HTJy-KJ4F2c/s88-c-k-no-mo-rj-c0xffffff/photo.jpg'
                   }
                 />
@@ -105,7 +109,7 @@ const MenuPresenter: React.SFC<IProps> = ({
           </Header>
           <SLink to={'/trips'}>Your Trips</SLink>
           <SLink to={'/settings'}>Settings</SLink>
-          <ToggleDriving isDriving={user.isDriving}>
+          <ToggleDriving onClick={() => ToggleDrivingMutation()} isDriving={user.isDriving}>
             { user.isDriving ? 'Stop Driving' : 'Start Driving' }
           </ToggleDriving>
         </>
