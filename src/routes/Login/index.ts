@@ -1,2 +1,1 @@
-import LoginPresenter from './LoginPresenter';
-export default LoginPresenter;
+export { default } from './LoginPresenter';

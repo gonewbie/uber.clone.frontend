@@ -1,2 +1,1 @@
-import BackArrow from './BackArrow';
-export default BackArrow;
+export { default } from './BackArrow';
