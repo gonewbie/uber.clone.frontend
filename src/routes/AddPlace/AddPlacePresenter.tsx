@@ -1,4 +1,5 @@
 import React from 'react';
+import { MutationFunction } from 'react-apollo';
 import Helmet from 'react-helmet';
 import { Link } from 'react-router-dom';
 import Button from 'src/Components/Button';
@@ -6,6 +7,7 @@ import Form from 'src/Components/Form';
 import Header from 'src/Components/Header';
 import Input from 'src/Components/Input';
 import styled from 'src/typed-components';
+import { addPlace, addPlaceVariables } from 'src/types/api';
 
 const Container = styled.div`
   padding: 0 40px;
@@ -26,13 +28,15 @@ interface IProps {
   name: string;
   onInputChange: React.ChangeEventHandler<HTMLInputElement>;
   loading: boolean;
+  onSubmit: MutationFunction<addPlace, addPlaceVariables>;
 }
 
 const AddPlacePresenter: React.SFC<IProps> = ({
   onInputChange,
   address,
   name,
-  loading
+  loading,
+  onSubmit
 }) => (
   <>
     <Helmet>
@@ -40,7 +44,7 @@ const AddPlacePresenter: React.SFC<IProps> = ({
     </Helmet>
     <Header title='Add Place' backTo='/' />
     <Container>
-      <Form submitFn={() => {}}>
+      <Form submitFn={onSubmit}>
         <ExtendedInput
           placeholder='Name'
           type='text'
@@ -56,7 +60,7 @@ const AddPlacePresenter: React.SFC<IProps> = ({
           name='address'
         />
         <ExtendedLink to='/find-address'>Pick place from map</ExtendedLink>
-        <Button onClick={() => {}} value={loading ? 'Adding place' : 'Add Place'}/>
+        <Button onClick={null} value={loading ? 'Adding place' : 'Add Place'}/>
       </Form>
     </Container>
   </>
