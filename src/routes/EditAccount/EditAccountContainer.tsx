@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React from 'react';
 import { Mutation, Query } from 'react-apollo';
 import { RouteComponentProps } from 'react-router';
@@ -13,6 +14,7 @@ interface IState {
   email: string;
   profilePhoto: string;
   loading: boolean;
+  uploading: boolean;
 }
 
 interface IProps extends RouteComponentProps<any> {};
@@ -23,11 +25,12 @@ class EditAccountContainer extends React.Component<IProps, IState> {
     firstName: '',
     lastName: '',
     loading: true,
-    profilePhoto: ''
+    profilePhoto: '',
+    uploading: false
   };
 
   public render() {
-    const { email, firstName, lastName, profilePhoto, loading } = this.state;
+    const { email, firstName, lastName, profilePhoto, loading, uploading } = this.state;
     return (
       <Query<userProfile> query={USER_PROFILE} onCompleted={this.updateFields}>
         {() => (
@@ -58,6 +61,7 @@ class EditAccountContainer extends React.Component<IProps, IState> {
                 onInputChange={this.onInputChange}
                 loading={updateLoading || loading}
                 onSubmit={() => updateProfileMutation()}
+                uploading={uploading}
               />
             )}
           </Mutation>
@@ -66,10 +70,33 @@ class EditAccountContainer extends React.Component<IProps, IState> {
     );
   }
 
-  public onInputChange: React.ChangeEventHandler<HTMLInputElement> = event => {
+  public onInputChange: React.ChangeEventHandler<HTMLInputElement> = async event => {
     const {
-      target: { name, value }
+      target: { name, value, files }
     } = event;
+
+    if (files) {
+      this.setState({
+        uploading: true
+      });
+      const formData = new FormData();
+      formData.append('file', files[0]);
+      formData.append('api_key', process.env.CLOUDINARY_API_KEY || 'API KEY');
+      formData.append('upload_preset', 'claemt3t');
+      formData.append('timestamp', String(Date.now() / 1000));
+      const {
+        data: { secure_url }
+      } = await axios.post(
+        'https://api.cloudinary.com/v1_1/daqazyeuj/image/upload',
+        formData
+      );
+      if (secure_url) {
+        this.setState({
+          profilePhoto: secure_url,
+          uploading: false
+        })
+      }
+    }
 
     this.setState({
       [name]: value
