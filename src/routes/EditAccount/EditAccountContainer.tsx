@@ -81,13 +81,13 @@ class EditAccountContainer extends React.Component<IProps, IState> {
       });
       const formData = new FormData();
       formData.append('file', files[0]);
-      formData.append('api_key', process.env.CLOUDINARY_API_KEY || 'API KEY');
+      formData.append('api_key', process.env.REACT_APP_CLOUDINARY_API_KEY || '');
       formData.append('upload_preset', 'claemt3t');
       formData.append('timestamp', String(Date.now() / 1000));
       const {
         data: { secure_url }
       } = await axios.post(
-        'https://api.cloudinary.com/v1_1/daqazyeuj/image/upload',
+        process.env.REACT_APP_CLOUDINARY_STORAGE || '',
         formData
       );
       if (secure_url) {
