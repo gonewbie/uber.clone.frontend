@@ -18,6 +18,9 @@ interface IState {
   toLng: number;
   lat: number;
   lng: number;
+  distance: string;
+  duration: string;
+  price: string;
 }
 
 class HomeContainer extends React.Component<IProps, IState> {
@@ -28,9 +31,12 @@ class HomeContainer extends React.Component<IProps, IState> {
   public directions: google.maps.DirectionsRenderer | null = null;
 
   public state = {
+    distance: '',
+    duration: '',
     isMenuOpen: false,
     lat: 0,
     lng: 0,
+    price: '',
     toAddress: '',
     toLat: 0,
     toLng: 0
@@ -49,7 +55,7 @@ class HomeContainer extends React.Component<IProps, IState> {
   }
 
   public render() {
-    const { isMenuOpen, toAddress } = this.state;
+    const { isMenuOpen, toAddress, price } = this.state;
     return (
       <Query<userProfile>
         query={USER_PROFILE}
@@ -63,6 +69,7 @@ class HomeContainer extends React.Component<IProps, IState> {
             toAddress={toAddress}
             onInputChange={this.onInputChange}
             onAddressSubmit={this.onAddressSubmit}
+            price={price}
           />
         )}
       </Query>
@@ -209,14 +216,35 @@ class HomeContainer extends React.Component<IProps, IState> {
       origin: from,
       travelMode: google.maps.TravelMode.DRIVING
     };
-    directionsService.route(directionsOptions, (result, status) => {
-      if (status === google.maps.DirectionsStatus.OK) {
-        this.directions!.setDirections(result);
-        this.directions!.setMap(this.map);
-      } else {
-        toast.error('There is no route there.');
-      }
-    })
+    directionsService.route(directionsOptions, this.handleRouteRequest);
+  }
+
+  public handleRouteRequest = (
+    result: google.maps.DirectionsResult,
+    status: google.maps.DirectionsStatus
+  ) => {
+    const { google } = this.props;
+    if (status === google.maps.DirectionsStatus.OK) {
+      const { routes } = result;
+      const {
+        distance: { text: distance },
+        duration: { text: duration }
+      } = routes[0].legs[0];
+      console.log(distance, duration);
+      this.setState({
+        distance,
+        duration,
+        price: this.carculatePrice(distance)
+      });
+      this.directions!.setDirections(result);
+      this.directions!.setMap(this.map);
+    } else {
+      toast.error('There is no route there.');
+    }
+  }
+
+  public carculatePrice = (distance: string) => {
+    return distance ? Number.parseFloat((Number.parseFloat(distance) * 3).toFixed(2)).toString(): '0'
   }
 };
 
