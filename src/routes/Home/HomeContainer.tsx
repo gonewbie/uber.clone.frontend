@@ -6,10 +6,12 @@ import { toast } from 'react-toastify';
 import { getCode } from 'src/lib/mapHelpers';
 import { USER_PROFILE } from 'src/sharedQueries.queries';
 import {
+  getDrivers,
   reportMovement,
   reportMovementVariables,
-  userProfile } from '../../types/api'
-import { REPORT_LOCATION } from './Home.queries';
+  userProfile
+} from '../../types/api'
+import { GET_NEARBY_DRIVERS, REPORT_LOCATION } from './Home.queries';
 import HomePresenter from './HomePresenter';
 
 interface IProps extends RouteComponentProps<any> {
@@ -65,17 +67,32 @@ class HomeContainer extends React.Component<IProps, IState> {
       <Query<userProfile>
         query={USER_PROFILE}
       >
-        {({ loading }) => (
-          <HomePresenter
-            loading={loading}
-            isMenuOpen={isMenuOpen}
-            toggleMenu={this.toggleMenu}
-            mapRef={this.mapRef}
-            toAddress={toAddress}
-            onInputChange={this.onInputChange}
-            onAddressSubmit={this.onAddressSubmit}
-            price={price}
-          />
+        {({ data, loading: profileLoading }) => (
+          <Query<getDrivers>
+            query={GET_NEARBY_DRIVERS}  
+            skip={
+              !!(data &&
+                data.GetMyProfile &&
+                data.GetMyProfile.user &&
+                data.GetMyProfile.user.isDriving
+              )
+            }
+            onCompleted={this.handleNearbyDrivers}
+          >
+            {() => (
+              <HomePresenter
+                loading={profileLoading}
+                isMenuOpen={isMenuOpen}
+                toggleMenu={this.toggleMenu}
+                mapRef={this.mapRef}
+                toAddress={toAddress}
+                onInputChange={this.onInputChange}
+                onAddressSubmit={this.onAddressSubmit}
+                price={price}
+                data={data}
+              />
+            )}
+          </Query>
         )}
       </Query>
     );
@@ -256,6 +273,17 @@ class HomeContainer extends React.Component<IProps, IState> {
 
   public carculatePrice = (distance: string) => {
     return distance ? Number.parseFloat((Number.parseFloat(distance) * 3).toFixed(2)).toString(): '0'
+  }
+
+  public handleNearbyDrivers = (data: {} | getDrivers) => {
+    if ('GetNearbyDrivers' in data) {
+      const {
+        GetNearbyDrivers: { drivers, ok }
+      } = data;
+      if(ok && drivers) {
+        console.log(drivers);
+      }
+    }
   }
 };
 
