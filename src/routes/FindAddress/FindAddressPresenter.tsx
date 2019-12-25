@@ -8,6 +8,20 @@ const Map = styled.div`
   left: 0;
   height: 100%;
   width: 100%;
+  z-index: 1;
+`;
+
+const CenterPoint = styled.div`
+  position: absolute;
+  width: 2rem;
+  height: 2rem;
+  z-index: 2;
+  font-size: 2rem;
+  margin: auto;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 `;
 
 interface IProps {
@@ -22,6 +36,7 @@ class FindAddressPresenter extends React.Component<IProps> {
         <Helmet>
           <title>Find Address | Uber</title>
         </Helmet>
+        <CenterPoint>📍</CenterPoint>
         <Map ref={mapRef}/>
       </div>
     );

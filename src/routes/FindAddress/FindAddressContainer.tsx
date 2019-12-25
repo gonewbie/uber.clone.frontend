@@ -13,28 +13,42 @@ class FindAddressContainer extends React.Component<any> {
   }
 
   public componentDidMount() {
-    const { google } = this.props;
-    const maps = google.maps;
-    const mapNode = ReactDOM.findDOMNode(this.mapRef.current);
-    console.log(google);
-    console.log(this.mapRef.current);
-    console.log(mapNode);
-    console.log(mapNode === this.mapRef.current);
-    const mapConfig: google.maps.MapOptions = {
-      center: {
-        lat: 37.5665,
-        lng: 126.9780
-      },
-      disableDefaultUI: true,
-      zoom: 11
-    }
-    this.map = new maps.Map(mapNode, mapConfig);
+    navigator.geolocation.getCurrentPosition(
+      this.handleGeoSuccess,
+      this.handleGeoError
+    )
   }
 
   public render() {
     return (
       <FindAddressPresenter mapRef={this.mapRef} />
     );
+  }
+
+  public handleGeoSuccess: PositionCallback = (position: Position) => {
+    const {
+      coords: { latitude, longitude }
+    } = position;
+    this.loadMap(latitude, longitude);
+  }
+
+  public handleGeoError: PositionErrorCallback = () => {
+    console.error('No Position');
+  }
+
+  public loadMap = (lat, lng) => {
+    const { google } = this.props;
+    const maps = google.maps;
+    const mapNode = ReactDOM.findDOMNode(this.mapRef.current);
+    const mapConfig: google.maps.MapOptions = {
+      center: {
+        lat,
+        lng
+      },
+      disableDefaultUI: true,
+      zoom: 11
+    }
+    this.map = new maps.Map(mapNode, mapConfig);
   }
 }
 
