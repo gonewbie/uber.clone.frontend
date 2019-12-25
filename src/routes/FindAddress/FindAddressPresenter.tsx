@@ -36,7 +36,7 @@ class FindAddressPresenter extends React.Component<IProps> {
         <Helmet>
           <title>Find Address | Uber</title>
         </Helmet>
-        <CenterPoint>📍</CenterPoint>
+        <CenterPoint><span role='img'>📍</span></CenterPoint>
         <Map ref={mapRef}/>
       </div>
     );
