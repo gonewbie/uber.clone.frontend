@@ -25,6 +25,7 @@ class HomeContainer extends React.Component<IProps, IState> {
   public map: google.maps.Map | null = null;
   public userMarker: google.maps.Marker | null = null;
   public toMarker: google.maps.Marker | null = null;
+  public directions: google.maps.DirectionsRenderer | null = null;
 
   public state = {
     isMenuOpen: false,
@@ -154,11 +155,6 @@ class HomeContainer extends React.Component<IProps, IState> {
     const result = await getCode(toAddress);
     if (result !== false) {
       const { lat, lng, formatted_address: formattedAddress } = result;
-      this.setState({
-        toAddress: formattedAddress,
-        toLat: lat,
-        toLng: lng
-      });
       if (this.toMarker) {
         this.toMarker.setMap(null);
       }
@@ -170,7 +166,57 @@ class HomeContainer extends React.Component<IProps, IState> {
       };
       this.toMarker = new maps.Marker(toMarkerOptions);
       this.toMarker!.setMap(this.map);
+
+      this.setState({
+        toAddress: formattedAddress,
+        toLat: lat,
+        toLng: lng
+      }, () => {
+        this.setBounds();
+        this.createPath();
+      });
     }
+  }
+
+  public setBounds = () => {
+    const { lat, lng, toLat, toLng } = this.state;
+    const { google: {maps} } = this.props;
+    const bounds = new maps.LatLngBounds();
+    bounds.extend({ lat, lng });
+    bounds.extend({ lat: toLat, lng: toLng });
+    this.map!.fitBounds(bounds);
+  }
+
+  public createPath = () => {
+    const { lat, lng, toLat, toLng } = this.state;
+    const { google } = this.props;
+    if (this.directions) {
+      this.directions.setMap(null);
+    }
+    const renderOptions: google.maps.DirectionsRendererOptions = {
+      polylineOptions: {
+        strokeColor: '#000'
+      },
+      suppressMarkers: true
+    }
+
+    this.directions = new google.maps.DirectionsRenderer(renderOptions);
+    const directionsService: google.maps.DirectionsService = new google.maps.DirectionsService();
+    const from = new google.maps.LatLng(lat, lng);
+    const to = new google.maps.LatLng(toLat, toLng);
+    const directionsOptions: google.maps.DirectionsRequest = {
+      destination: to,
+      origin: from,
+      travelMode: google.maps.TravelMode.DRIVING
+    };
+    directionsService.route(directionsOptions, (result, status) => {
+      if (status === google.maps.DirectionsStatus.OK) {
+        this.directions!.setDirections(result);
+        this.directions!.setMap(this.map);
+      } else {
+        toast.error('There is no route there.');
+      }
+    })
   }
 };
 
