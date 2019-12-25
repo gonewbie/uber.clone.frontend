@@ -1,7 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { RouteComponentProps } from 'react-router';
+import { toast } from 'react-toastify';
 import { getCode, reverseGeoCode } from '../../lib/mapHelpers';
 import FindAddressPresenter from './FindAddressPresenter';
+
+interface IProps extends RouteComponentProps<any> {
+  google: any;
+}
 
 interface IState {
   address: string;
@@ -9,7 +15,7 @@ interface IState {
   lng: number;
 }
 
-class FindAddressContainer extends React.Component<any, IState> {
+class FindAddressContainer extends React.Component<IProps, IState> {
   public mapRef: any;
   public map: google.maps.Map | null;
   public state = {
@@ -39,6 +45,7 @@ class FindAddressContainer extends React.Component<any, IState> {
         address={address}
         onInputChange={this.onInputChange}
         onInputBlur={this.onInputBlur}
+        onPickPlace={this.onPickPlace}
       />
     );
   }
@@ -56,7 +63,7 @@ class FindAddressContainer extends React.Component<any, IState> {
   }
 
   public handleGeoError: PositionErrorCallback = (error) => {
-    console.error(`Error ${error.code}: ${error.message}`);
+    toast.error(`HandleGeoError is occured! ${error.code}: ${error.message}`);
   }
 
   public loadMap = (lat, lng) => {
@@ -84,6 +91,7 @@ class FindAddressContainer extends React.Component<any, IState> {
       lat,
       lng
     })
+    this.reverseGeocodeAddress(lat, lng);
   }
 
   public onInputChange: React.ChangeEventHandler<HTMLInputElement> = event => {
@@ -108,6 +116,19 @@ class FindAddressContainer extends React.Component<any, IState> {
       });
       this.map.panTo({ lat, lng })
     }
+  }
+
+  public onPickPlace = () => {
+    const { address, lat, lng } = this.state;
+    const { history } = this.props;
+    history.push({
+      pathname: '/add-place',
+      state: {
+        address,
+        lat,
+        lng
+      }
+    })
   }
 
   public reverseGeocodeAddress = async (lat: number, lng: number) => {

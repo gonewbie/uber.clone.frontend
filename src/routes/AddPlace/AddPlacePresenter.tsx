@@ -1,5 +1,4 @@
 import React from 'react';
-import { MutationFunction } from 'react-apollo';
 import Helmet from 'react-helmet';
 import { Link } from 'react-router-dom';
 import Button from 'src/Components/Button';
@@ -7,7 +6,6 @@ import Form from 'src/Components/Form';
 import Header from 'src/Components/Header';
 import Input from 'src/Components/Input';
 import styled from 'src/typed-components';
-import { addPlace, addPlaceVariables } from 'src/types/api';
 
 const Container = styled.div`
   padding: 0 40px;
@@ -28,7 +26,7 @@ interface IProps {
   name: string;
   onInputChange: React.ChangeEventHandler<HTMLInputElement>;
   loading: boolean;
-  onSubmit: MutationFunction<addPlace, addPlaceVariables>;
+  onSubmit: () => void;
 }
 
 const AddPlacePresenter: React.SFC<IProps> = ({

@@ -17,11 +17,15 @@ interface IState {
 interface IProps extends RouteComponentProps <any> {}
 
 class AddPlaceContainer extends React.Component<IProps, IState> {
-  public state = {
-    address: '',
-    lat: 1.34,
-    lng: 1.44,
-    name: ''
+  constructor(props: IProps) {
+    super(props);
+    const { location: { state = {} } = {} } = props;
+    this.state = {
+      address: state.address || '',
+      lat: state.lat || 0,
+      lng: state.lng || 0,
+      name: ''
+    };
   }
 
   public render() {
@@ -37,7 +41,7 @@ class AddPlaceContainer extends React.Component<IProps, IState> {
           lng,
           name
         }}
-        onCompleted={data => {
+        onCompleted={ data => {
           const { AddPlace } = data;
           if (AddPlace.ok) {
             toast.success('Place added');
@@ -56,7 +60,7 @@ class AddPlaceContainer extends React.Component<IProps, IState> {
             address={address}
             name={name}
             loading={loading}
-            onSubmit={addPlacesMutation}
+            onSubmit={() => this.validatePlace(addPlacesMutation)}
           />
         )}
       </Mutation>
@@ -64,7 +68,7 @@ class AddPlaceContainer extends React.Component<IProps, IState> {
   }
 
   public onInputChange: React.ChangeEventHandler<
-  HTMLInputElement
+    HTMLInputElement
   > = async event => {
     const {
       target: { name, value }
@@ -72,6 +76,15 @@ class AddPlaceContainer extends React.Component<IProps, IState> {
     this.setState({
       [name]: value
     } as any);
+  }
+
+  public validatePlace(mutation) {
+    const { lat, lng } = this.state;
+    if (lat === 0 && lng === 0) {
+      toast.error('Invalid Position Info');
+      return;
+    }
+    mutation();
   }
 }
 
