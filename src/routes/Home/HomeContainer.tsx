@@ -1,17 +1,17 @@
 import React from 'react';
-import { graphql, MutationFunction, Query } from 'react-apollo';
+import { graphql, Mutation, MutationFunction, Query } from 'react-apollo';
 import ReactDOM from 'react-dom';
 import { RouteComponentProps } from 'react-router';
 import { toast } from 'react-toastify';
-import { getCode } from 'src/lib/mapHelpers';
+import {getCode, reverseGeoCode} from 'src/lib/mapHelpers';
 import { USER_PROFILE } from 'src/sharedQueries.queries';
 import {
   getDrivers,
   reportMovement,
-  reportMovementVariables,
+  reportMovementVariables, requestRide, requestRideVariables,
   userProfile
 } from '../../types/api'
-import { GET_NEARBY_DRIVERS, REPORT_LOCATION } from './Home.queries';
+import {GET_NEARBY_DRIVERS, REPORT_LOCATION, REQUEST_RIDE} from './Home.queries';
 import HomePresenter from './HomePresenter';
 
 interface IProps extends RouteComponentProps<any> {
@@ -28,6 +28,7 @@ interface IState {
   distance: string;
   duration: string;
   price: string;
+  fromAddress: string;
 }
 
 class HomeContainer extends React.Component<IProps, IState> {
@@ -41,6 +42,7 @@ class HomeContainer extends React.Component<IProps, IState> {
   public state = {
     distance: '',
     duration: '',
+    fromAddress: '',
     isMenuOpen: false,
     lat: 0,
     lng: 0,
@@ -48,7 +50,7 @@ class HomeContainer extends React.Component<IProps, IState> {
     toAddress: '',
     toLat: 0,
     toLng: 0
-  }
+  };
 
   constructor(props) {
     super(props);
@@ -64,7 +66,18 @@ class HomeContainer extends React.Component<IProps, IState> {
   }
 
   public render() {
-    const { isMenuOpen, toAddress, price } = this.state;
+    const {
+      isMenuOpen,
+      toAddress,
+      price,
+      distance,
+      fromAddress,
+      lat,
+      lng,
+      toLat,
+      toLng,
+      duration
+    } = this.state;
     return (
       <Query<userProfile>
         query={USER_PROFILE}
@@ -83,17 +96,35 @@ class HomeContainer extends React.Component<IProps, IState> {
             onCompleted={this.handleNearbyDrivers}
           >
             {() => (
-              <HomePresenter
-                loading={profileLoading}
-                isMenuOpen={isMenuOpen}
-                toggleMenu={this.toggleMenu}
-                mapRef={this.mapRef}
-                toAddress={toAddress}
-                onInputChange={this.onInputChange}
-                onAddressSubmit={this.onAddressSubmit}
-                price={price}
-                data={data}
-              />
+              <Mutation<requestRide, requestRideVariables>
+                mutation={REQUEST_RIDE}
+                variables={{
+                  distance,
+                  dropOffAddress: toAddress,
+                  dropOffLat: toLat,
+                  dropOffLng: toLng,
+                  duration,
+                  pickUpAddress: fromAddress,
+                  pickUpLat: lat,
+                  pickUpLng: lng,
+                  price: Number(price) || 0
+                }}
+              >
+                {requestRideMutation => (
+                  <HomePresenter
+                    loading={profileLoading}
+                    isMenuOpen={isMenuOpen}
+                    toggleMenu={this.toggleMenu}
+                    mapRef={this.mapRef}
+                    toAddress={toAddress}
+                    onInputChange={this.onInputChange}
+                    onAddressSubmit={this.onAddressSubmit}
+                    price={price}
+                    data={data}
+                    requestRideMutation={requestRideMutation}
+                  />
+                )}
+              </Mutation>
             )}
           </Query>
         )}
@@ -117,12 +148,22 @@ class HomeContainer extends React.Component<IProps, IState> {
       lat: latitude,
       lng: longitude
     });
+    this.getFromAddress(latitude, longitude);
     this.loadMap(latitude, longitude);
-  }
+  };
 
   public handleGeoError: PositionErrorCallback = (error) => {
     toast.error(`HandleGeoError is occured! ${error.code}: ${error.message}`);
-  }
+  };
+
+  public getFromAddress = async (lat: number, lng: number) => {
+    const address = await reverseGeoCode(lat, lng);
+    if (address) {
+      this.setState({
+        fromAddress: address
+      });
+    }
+  };
 
   public loadMap = (lat, lng) => {
     const { google } = this.props;
@@ -176,11 +217,11 @@ class HomeContainer extends React.Component<IProps, IState> {
         lng
       }
     })
-  }
+  };
 
   public handleGeoWatchError: PositionErrorCallback = (error) => {
     toast.error(`HandleGeoWatchError is occured! ${error.code}: ${error.message}`);
-  }
+  };
 
   public onInputChange: React.ChangeEventHandler<HTMLInputElement> = event => {
     const {
@@ -189,7 +230,7 @@ class HomeContainer extends React.Component<IProps, IState> {
     this.setState({
       [name]: value
     } as any);
-  }
+  };
 
   public onAddressSubmit = async () => {
     const { toAddress } = this.state;
@@ -219,7 +260,7 @@ class HomeContainer extends React.Component<IProps, IState> {
         this.createPath();
       });
     }
-  }
+  };
 
   public setBounds = () => {
     const { lat, lng, toLat, toLng } = this.state;
@@ -228,7 +269,7 @@ class HomeContainer extends React.Component<IProps, IState> {
     bounds.extend({ lat, lng });
     bounds.extend({ lat: toLat, lng: toLng });
     this.map!.fitBounds(bounds);
-  }
+  };
 
   public createPath = () => {
     const { lat, lng, toLat, toLng } = this.state;
@@ -241,7 +282,7 @@ class HomeContainer extends React.Component<IProps, IState> {
         strokeColor: '#000'
       },
       suppressMarkers: true
-    }
+    };
 
     this.directions = new google.maps.DirectionsRenderer(renderOptions);
     const directionsService: google.maps.DirectionsService = new google.maps.DirectionsService();
@@ -253,7 +294,7 @@ class HomeContainer extends React.Component<IProps, IState> {
       travelMode: google.maps.TravelMode.DRIVING
     };
     directionsService.route(directionsOptions, this.handleRouteRequest);
-  }
+  };
 
   public handleRouteRequest = (
     result: google.maps.DirectionsResult,
@@ -276,11 +317,11 @@ class HomeContainer extends React.Component<IProps, IState> {
     } else {
       toast.error('There is no route there.');
     }
-  }
+  };
 
   public carculatePrice = (distance: string) => {
     return distance ? Number.parseFloat((Number.parseFloat(distance) * 3).toFixed(2)).toString(): '0'
-  }
+  };
 
   public handleNearbyDrivers = (data: {} | getDrivers) => {
     if ('GetNearbyDrivers' in data) {
@@ -301,7 +342,7 @@ class HomeContainer extends React.Component<IProps, IState> {
         }
       }
     }
-  }
+  };
 
   public createDriverMarker = (driver) => {
     if (driver && driver.lastLat && driver.lastLng) {
@@ -324,7 +365,7 @@ class HomeContainer extends React.Component<IProps, IState> {
       }
     }
     return;
-  }
+  };
 
   public updateDriverMarker = (marker: google.maps.Marker, driver) => {
     if (driver && driver.lastLat && driver.lastLng) {
@@ -336,7 +377,7 @@ class HomeContainer extends React.Component<IProps, IState> {
     }
     return;
   }
-};
+}
 
 export default graphql<any, reportMovement, reportMovementVariables>(
   REPORT_LOCATION,

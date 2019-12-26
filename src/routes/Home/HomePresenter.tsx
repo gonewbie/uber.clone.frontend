@@ -1,10 +1,11 @@
 import React from 'react';
+import { MutationFunction } from 'react-apollo';
 import Helmet from 'react-helmet';
 import Sidebar from 'react-sidebar';
 import AddressBar from 'src/Components/AddressBar';
 import Button from 'src/Components/Button';
-import { userProfile } from 'src/types/api';
-import Menu from '../../Components/Menu';
+import Menu from 'src/Components/Menu';
+import {requestRide, requestRideVariables, userProfile} from 'src/types/api';
 import styled from '../../typed-components';
 
 const Container = styled.div``;
@@ -52,6 +53,7 @@ interface IProps {
   onInputChange: React.ChangeEventHandler<HTMLInputElement>;
   price: string;
   data?: userProfile;
+  requestRideMutation?: MutationFunction<requestRide, requestRideVariables>;
 }
 
 const HomePresenter: React.SFC<IProps> = ({
@@ -63,7 +65,8 @@ const HomePresenter: React.SFC<IProps> = ({
   onInputChange,
   onAddressSubmit,
   price,
-  data: { GetMyProfile: { user = null } = {} } = { GetMyProfile: {} }
+  data: { GetMyProfile: { user = null } = {} } = { GetMyProfile: {} },
+  requestRideMutation,
 }) => (
   <Container>
     <Helmet>
@@ -101,7 +104,7 @@ const HomePresenter: React.SFC<IProps> = ({
       )}
       {!price ? false : (
         <RequestButton
-          onClick={onAddressSubmit}
+          onClick={requestRideMutation}
           disabled={toAddress === ''}
           value={`Request Ride ($${price})`}
         />
