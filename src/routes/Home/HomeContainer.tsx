@@ -6,12 +6,12 @@ import { toast } from 'react-toastify';
 import {getCode, reverseGeoCode} from 'src/lib/mapHelpers';
 import { USER_PROFILE } from 'src/sharedQueries.queries';
 import {
-  getDrivers,
+  getDrivers, getRides,
   reportMovement,
   reportMovementVariables, requestRide, requestRideVariables,
   userProfile
 } from '../../types/api'
-import {GET_NEARBY_DRIVERS, REPORT_LOCATION, REQUEST_RIDE} from './Home.queries';
+import {GET_NEARBY_DRIVERS, GET_NEARBY_RIDE, REPORT_LOCATION, REQUEST_RIDE} from './Home.queries';
 import HomePresenter from './HomePresenter';
 
 interface IProps extends RouteComponentProps<any> {
@@ -29,6 +29,7 @@ interface IState {
   duration: string;
   price: string;
   fromAddress: string;
+  isDriving: boolean;
 }
 
 class HomeContainer extends React.Component<IProps, IState> {
@@ -43,6 +44,7 @@ class HomeContainer extends React.Component<IProps, IState> {
     distance: '',
     duration: '',
     fromAddress: '',
+    isDriving: true,
     isMenuOpen: false,
     lat: 0,
     lng: 0,
@@ -76,23 +78,19 @@ class HomeContainer extends React.Component<IProps, IState> {
       lng,
       toLat,
       toLng,
-      duration
+      duration,
+      isDriving
     } = this.state;
     return (
       <Query<userProfile>
         query={USER_PROFILE}
+        onCompleted={this.handleProfileQuery}
       >
         {({ data, loading: profileLoading }) => (
           <Query<getDrivers>
             query={GET_NEARBY_DRIVERS}  
             pollInterval={1000}
-            skip={
-              !!(data &&
-                data.GetMyProfile &&
-                data.GetMyProfile.user &&
-                data.GetMyProfile.user.isDriving
-              )
-            }
+            skip={isDriving}
             onCompleted={this.handleNearbyDrivers}
           >
             {() => (
@@ -111,18 +109,22 @@ class HomeContainer extends React.Component<IProps, IState> {
                 }}
               >
                 {requestRideMutation => (
-                  <HomePresenter
-                    loading={profileLoading}
-                    isMenuOpen={isMenuOpen}
-                    toggleMenu={this.toggleMenu}
-                    mapRef={this.mapRef}
-                    toAddress={toAddress}
-                    onInputChange={this.onInputChange}
-                    onAddressSubmit={this.onAddressSubmit}
-                    price={price}
-                    data={data}
-                    requestRideMutation={requestRideMutation}
-                  />
+                  <Query<getRides> query={GET_NEARBY_RIDE} skip={!isDriving}>
+                    {({ data: nearbyRide }) => ( console.log(nearbyRide),
+                        <HomePresenter
+                          loading={profileLoading}
+                          isMenuOpen={isMenuOpen}
+                          toggleMenu={this.toggleMenu}
+                          mapRef={this.mapRef}
+                          toAddress={toAddress}
+                          onInputChange={this.onInputChange}
+                          onAddressSubmit={this.onAddressSubmit}
+                          price={price}
+                          data={data}
+                          requestRideMutation={requestRideMutation}
+                        />
+                    )}
+                  </Query>
                 )}
               </Mutation>
             )}
@@ -161,6 +163,27 @@ class HomeContainer extends React.Component<IProps, IState> {
     if (address) {
       this.setState({
         fromAddress: address
+      });
+    }
+  };
+
+  public handleRideRequest = (data: requestRide) => {
+    const { RequestRide } = data;
+    if (RequestRide.ok) {
+      toast.success('Drive requested, finding a driver');
+    } else {
+      toast.error(RequestRide.error);
+    }
+  };
+
+  public handleProfileQuery = (data: userProfile) => {
+    const { GetMyProfile } = data;
+    if (GetMyProfile) {
+      const {
+        user
+      } = GetMyProfile || { user: {} };
+      this.setState({
+        isDriving: user!.isDriving
       });
     }
   };
