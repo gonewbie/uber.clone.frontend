@@ -38,3 +38,28 @@ export const UPDATE_RIDE_STATUS = gql`
     }
   }
 `;
+
+export const RIDE_SUBSCRIPTION = gql`
+  subscription rideUpdate {
+    RideStatusSubscription {
+      id
+      status
+      pickUpAddress
+      dropOffAddress
+      price
+      distance
+      duration
+      driver {
+        id
+        fullName
+        profilePhoto
+      }
+      passenger {
+        id
+        fullName
+        profilePhoto
+      }
+      chatId
+    }
+  }
+`;

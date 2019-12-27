@@ -361,6 +361,46 @@ export interface updateRideVariables {
 // This file was automatically generated and should not be edited.
 
 // ====================================================
+// GraphQL subscription operation: rideUpdate
+// ====================================================
+
+export interface rideUpdate_RideStatusSubscription_driver {
+  __typename: "User";
+  id: number;
+  fullName: string | null;
+  profilePhoto: string | null;
+}
+
+export interface rideUpdate_RideStatusSubscription_passenger {
+  __typename: "User";
+  id: number;
+  fullName: string | null;
+  profilePhoto: string | null;
+}
+
+export interface rideUpdate_RideStatusSubscription {
+  __typename: "Ride";
+  id: number;
+  status: string;
+  pickUpAddress: string;
+  dropOffAddress: string;
+  price: number;
+  distance: string;
+  duration: string;
+  driver: rideUpdate_RideStatusSubscription_driver;
+  passenger: rideUpdate_RideStatusSubscription_passenger;
+  chatId: number | null;
+}
+
+export interface rideUpdate {
+  RideStatusSubscription: rideUpdate_RideStatusSubscription | null;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// This file was automatically generated and should not be edited.
+
+// ====================================================
 // GraphQL mutation operation: facebookConnect
 // ====================================================
 
