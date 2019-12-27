@@ -1,4 +1,5 @@
 import React from 'react';
+import { SubscribeToMoreOptions } from "apollo-client";
 import { graphql, Mutation, MutationFunction, Query } from 'react-apollo';
 import ReactDOM from 'react-dom';
 import { RouteComponentProps } from 'react-router';
@@ -12,7 +13,7 @@ import {
   reportMovementVariables, requestRide, requestRideVariables,
   userProfile
 } from '../../types/api'
-import {ACCEPT_RIDE, GET_NEARBY_DRIVERS, GET_NEARBY_RIDE, REPORT_LOCATION, REQUEST_RIDE} from './Home.queries';
+import {ACCEPT_RIDE, GET_NEARBY_DRIVERS, GET_NEARBY_RIDE, REPORT_LOCATION, REQUEST_RIDE, SUBSCRIBE_NEARBY_RIDE} from './Home.queries';
 import HomePresenter from './HomePresenter';
 
 interface IProps extends RouteComponentProps<any> {
@@ -111,28 +112,46 @@ class HomeContainer extends React.Component<IProps, IState> {
               >
                 {requestRideMutation => (
                   <Query<getRides> query={GET_NEARBY_RIDE} skip={!isDriving}>
-                    {({ data: nearbyRide }) => (
-                      <Mutation<accecptRide, accecptRideVariables>
-                        mutation={ACCEPT_RIDE}
-                      >
-                        {acceptRideMutation => (
-                          <HomePresenter
-                            loading={profileLoading}
-                            isMenuOpen={isMenuOpen}
-                            toggleMenu={this.toggleMenu}
-                            mapRef={this.mapRef}
-                            toAddress={toAddress}
-                            onInputChange={this.onInputChange}
-                            onAddressSubmit={this.onAddressSubmit}
-                            price={price}
-                            data={data}
-                            requestRideMutation={requestRideMutation}
-                            nearbyRide={nearbyRide}
-                            acceptRideMutation={acceptRideMutation}
-                          />
-                        )}
-                      </Mutation>
-                    )}
+                    {({ subscribeToMore, data: nearbyRide }) => {
+                      const rideSubscriptionOptions: SubscribeToMoreOptions = {
+                        document: SUBSCRIBE_NEARBY_RIDE,
+                        updateQuery: (prev, { subscriptionData }) => {
+                          if (!subscriptionData.data) {
+                            return prev;
+                          }
+                          const updateData = Object.assign({}, prev, {
+                            GetNearbyRide: {
+                              ...prev.GetNearbyRide,
+                              ride: subscriptionData.data.NearbyRideSubscription
+                            }
+                          });
+                          return updateData;
+                        }
+                      };
+                      subscribeToMore(rideSubscriptionOptions);
+                      return (
+                        <Mutation<accecptRide, accecptRideVariables>
+                          mutation={ACCEPT_RIDE}
+                        >
+                          {acceptRideMutation => (
+                            <HomePresenter
+                              loading={profileLoading}
+                              isMenuOpen={isMenuOpen}
+                              toggleMenu={this.toggleMenu}
+                              mapRef={this.mapRef}
+                              toAddress={toAddress}
+                              onInputChange={this.onInputChange}
+                              onAddressSubmit={this.onAddressSubmit}
+                              price={price}
+                              data={data}
+                              requestRideMutation={requestRideMutation}
+                              nearbyRide={nearbyRide}
+                              acceptRideMutation={acceptRideMutation}
+                            />
+                          )}
+                        </Mutation>
+                      )}
+                    }
                   </Query>
                 )}
               </Mutation>
