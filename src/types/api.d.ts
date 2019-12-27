@@ -220,6 +220,7 @@ export interface accecptRide_UpdateRideStatus {
   __typename: "UpdateRideStatusResponse";
   ok: boolean;
   error: string | null;
+  rideId: number | null;
 }
 
 export interface accecptRide {

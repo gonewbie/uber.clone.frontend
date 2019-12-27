@@ -1,5 +1,5 @@
-import React from 'react';
 import { SubscribeToMoreOptions } from "apollo-client";
+import React from 'react';
 import { graphql, Mutation, MutationFunction, Query } from 'react-apollo';
 import ReactDOM from 'react-dom';
 import { RouteComponentProps } from 'react-router';
@@ -132,6 +132,7 @@ class HomeContainer extends React.Component<IProps, IState> {
                       return (
                         <Mutation<accecptRide, accecptRideVariables>
                           mutation={ACCEPT_RIDE}
+                          onCompleted={this.handleRideAcceptance}
                         >
                           {acceptRideMutation => (
                             <HomePresenter
@@ -196,11 +197,21 @@ class HomeContainer extends React.Component<IProps, IState> {
   };
 
   public handleRideRequest = (data: requestRide) => {
+    const { history } = this.props;
     const { RequestRide } = data;
     if (RequestRide.ok) {
       toast.success('Drive requested, finding a driver');
+      history.push(`/ride/${RequestRide.ride!.id}`);
     } else {
       toast.error(RequestRide.error);
+    }
+  };
+
+  public handleRideAcceptance = (data: accecptRide) => {
+    const { history } = this.props;
+    const { UpdateRideStatus } = data;
+    if (UpdateRideStatus.ok) {
+      history.push(`/ride/${UpdateRideStatus.rideId}`);
     }
   };
 
