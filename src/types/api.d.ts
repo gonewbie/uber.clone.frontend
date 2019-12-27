@@ -213,6 +213,28 @@ export interface getRides {
 // This file was automatically generated and should not be edited.
 
 // ====================================================
+// GraphQL mutation operation: accecptRide
+// ====================================================
+
+export interface accecptRide_UpdateRideStatus {
+  __typename: "UpdateRideStatusResponse";
+  ok: boolean;
+  error: string | null;
+}
+
+export interface accecptRide {
+  UpdateRideStatus: accecptRide_UpdateRideStatus;
+}
+
+export interface accecptRideVariables {
+  rideId: number;
+}
+
+/* tslint:disable */
+/* eslint-disable */
+// This file was automatically generated and should not be edited.
+
+// ====================================================
 // GraphQL mutation operation: startPhoneVerification
 // ====================================================
 

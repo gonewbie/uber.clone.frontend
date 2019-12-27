@@ -6,12 +6,13 @@ import { toast } from 'react-toastify';
 import {getCode, reverseGeoCode} from 'src/lib/mapHelpers';
 import { USER_PROFILE } from 'src/sharedQueries.queries';
 import {
+  accecptRide, accecptRideVariables,
   getDrivers, getRides,
   reportMovement,
   reportMovementVariables, requestRide, requestRideVariables,
   userProfile
 } from '../../types/api'
-import {GET_NEARBY_DRIVERS, GET_NEARBY_RIDE, REPORT_LOCATION, REQUEST_RIDE} from './Home.queries';
+import {ACCEPT_RIDE, GET_NEARBY_DRIVERS, GET_NEARBY_RIDE, REPORT_LOCATION, REQUEST_RIDE} from './Home.queries';
 import HomePresenter from './HomePresenter';
 
 interface IProps extends RouteComponentProps<any> {
@@ -110,19 +111,27 @@ class HomeContainer extends React.Component<IProps, IState> {
               >
                 {requestRideMutation => (
                   <Query<getRides> query={GET_NEARBY_RIDE} skip={!isDriving}>
-                    {({ data: nearbyRide }) => ( console.log(nearbyRide),
-                        <HomePresenter
-                          loading={profileLoading}
-                          isMenuOpen={isMenuOpen}
-                          toggleMenu={this.toggleMenu}
-                          mapRef={this.mapRef}
-                          toAddress={toAddress}
-                          onInputChange={this.onInputChange}
-                          onAddressSubmit={this.onAddressSubmit}
-                          price={price}
-                          data={data}
-                          requestRideMutation={requestRideMutation}
-                        />
+                    {({ data: nearbyRide }) => (
+                      <Mutation<accecptRide, accecptRideVariables>
+                        mutation={ACCEPT_RIDE}
+                      >
+                        {acceptRideMutation => (
+                          <HomePresenter
+                            loading={profileLoading}
+                            isMenuOpen={isMenuOpen}
+                            toggleMenu={this.toggleMenu}
+                            mapRef={this.mapRef}
+                            toAddress={toAddress}
+                            onInputChange={this.onInputChange}
+                            onAddressSubmit={this.onAddressSubmit}
+                            price={price}
+                            data={data}
+                            requestRideMutation={requestRideMutation}
+                            nearbyRide={nearbyRide}
+                            acceptRideMutation={acceptRideMutation}
+                          />
+                        )}
+                      </Mutation>
                     )}
                   </Query>
                 )}
@@ -155,7 +164,7 @@ class HomeContainer extends React.Component<IProps, IState> {
   };
 
   public handleGeoError: PositionErrorCallback = (error) => {
-    toast.error(`HandleGeoError is occured! ${error.code}: ${error.message}`);
+    toast.error(`HandleGeoError is occurred! ${error.code}: ${error.message}`);
   };
 
   public getFromAddress = async (lat: number, lng: number) => {
@@ -203,7 +212,7 @@ class HomeContainer extends React.Component<IProps, IState> {
       },
       disableDefaultUI: true,
       zoom: 13
-    }
+    };
     this.map = new maps.Map(mapNode, mapConfig);
     const watchOptions: PositionOptions = {
       enableHighAccuracy: true
