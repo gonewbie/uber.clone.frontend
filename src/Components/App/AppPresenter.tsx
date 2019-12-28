@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 import AddPlace from '../../routes/AddPlace';
+import Chat from '../../routes/Chat';
 import EditAccount from '../../routes/EditAccount';
 import FindAddress from '../../routes/FindAddress';
 import Home from '../../routes/Home';
@@ -30,6 +31,7 @@ const LoggedInRouter: React.SFC = () => (
   <Switch>
     <Route path={'/'} exact={true} component={Home} />
     <Route path={'/ride/:rideId'} exact={true} component={Ride} />
+    <Route path={'/chat/:chatId'} exact={true} component={Chat} />
     <Route path={'/edit-account'} exact={true} component={EditAccount} />
     <Route path={'/settings'} exact={true} component={Settings} />
     <Route path={'/places'} exact={true} component={Places} />
