@@ -1,6 +1,6 @@
+import React from 'react';
 import Form from "../../Components/Form";
 import Header from "../../Components/Header";
-import React from 'react';
 import Input from "../../Components/Input";
 import Message from "../../Components/Message";
 import styled from '../../typed-components';

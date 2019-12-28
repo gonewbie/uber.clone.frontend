@@ -10,9 +10,9 @@ const Container = withProps<IProps, HTMLDivElement>(styled.li)`
   color: white;
   padding: 1rem 1.2rem;
   border-radius: 1.2rem;
-  align-self: ${props => (props.mine ? 'flex-red' : 'flex-start')};
+  align-self: ${props => (props.mine ? 'flex-end' : 'flex-start')};
   border-bottom-right-radius: ${props => (props.mine ? '0' : '1.2rem')};
-  border-bottom-left-radius: ${props => (props.mine ? '0' : '1.2rem')};
+  border-bottom-left-radius: ${props => (!props.mine ? '0' : '1.2rem')};
 `;
 
 const Message: React.SFC<IProps> = ({ text, mine }) => (
